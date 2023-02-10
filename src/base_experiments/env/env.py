@@ -7,7 +7,7 @@ import torch
 from arm_pytorch_utilities import load_data as load_utils, array_utils
 from arm_pytorch_utilities.make_data import datasource
 
-from stucco import cfg
+from base_experiments import cfg
 from stucco.detection import ContactDetector
 
 
