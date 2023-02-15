@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>base_experiments</name>
+    <version>0.2.0</version>
+    <description>Shared experiments library code for many python based experiments</description>
+    <author email="zhsh@umich.edu">Sheng Zhong</author>
+    <maintainer email="zhsh@umich.edu">Sheng Zhong</maintainer>
+    <license>MIT</license>
+    <url>https://github.com/UM-ARM-Lab/base_experiments</url>
+    <buildtool_depend>catkin</buildtool_depend>
+    <depend>rospy</depend>
+    <depend>std_msgs</depend>
+    <exec_depend>joint_state_publisher</exec_depend>
+    <exec_depend>robot_state_publisher</exec_depend>
+    <exec_depend>rviz</exec_depend>
+    <exec_depend>xacro</exec_depend>
+</package>
