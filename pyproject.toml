@@ -1,6 +1,6 @@
 [project]
 name = "arm_base_experiments"
-version = "0.1.0"
+version = "0.2.0"
 description = "Shared experiments library code for many python based experiments"
 readme = "README.md" # Optional
 
