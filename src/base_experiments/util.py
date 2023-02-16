@@ -1,4 +1,6 @@
 import matplotlib
+import logging
+import os
 
 
 def move_figure(f, x, y):
@@ -12,3 +14,9 @@ def move_figure(f, x, y):
         # This works for QT and GTK
         # You can also use window.setGeometry
         f.canvas.manager.window.move(x, y)
+
+
+class MakedirsFileHandler(logging.FileHandler):
+    def __init__(self, filename, *args, **kwargs):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        logging.FileHandler.__init__(self, filename, *args, **kwargs)
