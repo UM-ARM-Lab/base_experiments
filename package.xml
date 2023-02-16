@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
     <name>base_experiments</name>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
     <description>Shared experiments library code for many python based experiments</description>
     <author email="zhsh@umich.edu">Sheng Zhong</author>
     <maintainer email="zhsh@umich.edu">Sheng Zhong</maintainer>
