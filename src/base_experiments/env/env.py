@@ -312,49 +312,45 @@ class EnvDataSource(datasource.FileDataSource):
         return self.loader.info_desc
 
 
-def draw_AABB(vis: Visualizer, aabb):
+def aabb_to_ordered_end_points(aabb):
     aabbMin = aabb[:, 0]
     aabbMax = aabb[:, 1]
-    f = np.array([aabbMin[0], aabbMin[1], aabbMin[2]])
-    t = np.array([aabbMax[0], aabbMin[1], aabbMin[2]])
-    vis.draw_2d_line("bb.0", f, t - f, (1, 0, 0), scale=1)
-    f = np.array([aabbMin[0], aabbMin[1], aabbMin[2]])
-    t = np.array([aabbMin[0], aabbMax[1], aabbMin[2]])
-    vis.draw_2d_line("bb.1", f, t - f, (0, 1, 0), scale=1)
-    f = np.array([aabbMin[0], aabbMin[1], aabbMin[2]])
-    t = np.array([aabbMin[0], aabbMin[1], aabbMax[2]])
-    vis.draw_2d_line("bb.2", f, t - f, (0, 0, 1), scale=1)
+    pts = np.array([
+        [aabbMin[0], aabbMin[1], aabbMin[2]],
+        [aabbMax[0], aabbMin[1], aabbMin[2]],
+        [aabbMin[0], aabbMax[1], aabbMin[2]],
+        [aabbMin[0], aabbMin[1], aabbMax[2]],
+        [aabbMin[0], aabbMax[1], aabbMax[2]],
+        [aabbMax[0], aabbMin[1], aabbMax[2]],
+        [aabbMax[0], aabbMax[1], aabbMin[2]],
+        [aabbMax[0], aabbMax[1], aabbMax[2]]
+    ])
+    return pts
 
-    f = np.array([aabbMin[0], aabbMin[1], aabbMax[2]])
-    t = np.array([aabbMin[0], aabbMax[1], aabbMax[2]])
-    vis.draw_2d_line("bb.3", f, t - f, (1, 1, 1), scale=1)
 
-    f = np.array([aabbMin[0], aabbMin[1], aabbMax[2]])
-    t = np.array([aabbMax[0], aabbMin[1], aabbMax[2]])
-    vis.draw_2d_line("bb.4", f, t - f, (1, 1, 1), scale=1)
+def draw_ordered_end_points(vis: Visualizer, pts):
+    order_to_rgb = {
+        (0, 1): (1, 0, 0),
+        (0, 2): (0, 1, 0),
+        (0, 3): (0, 0, 1),
+        (3, 4): (1, 1, 1),
+        (3, 5): (1, 1, 1),
+        (1, 5): (1, 1, 1),
+        (1, 6): (1, 1, 1),
+        (6, 2): (1, 1, 1),
+        (2, 4): (1, 1, 1),
+        (7, 4): (1, 1, 1),
+        (7, 5): (1, 1, 1),
+        (7, 6): (1, 1, 1)
+    }
+    i = 0
+    for pair, rgb in order_to_rgb.items():
+        f = pts[pair[0]]
+        t = pts[pair[1]]
+        vis.draw_2d_line(f"bb.{i}", f, t - f, rgb, scale=1)
+        i += 1
 
-    f = np.array([aabbMax[0], aabbMin[1], aabbMin[2]])
-    t = np.array([aabbMax[0], aabbMin[1], aabbMax[2]])
-    vis.draw_2d_line("bb.5", f, t - f, (1, 1, 1), scale=1)
 
-    f = np.array([aabbMax[0], aabbMin[1], aabbMin[2]])
-    t = np.array([aabbMax[0], aabbMax[1], aabbMin[2]])
-    vis.draw_2d_line("bb.6", f, t - f, (1, 1, 1), scale=1)
-
-    f = np.array([aabbMax[0], aabbMax[1], aabbMin[2]])
-    t = np.array([aabbMin[0], aabbMax[1], aabbMin[2]])
-    vis.draw_2d_line("bb.7", f, t - f, (1, 1, 1), scale=1)
-
-    f = np.array([aabbMin[0], aabbMax[1], aabbMin[2]])
-    t = np.array([aabbMin[0], aabbMax[1], aabbMax[2]])
-    vis.draw_2d_line("bb.8", f, t - f, (1, 1, 1), scale=1)
-
-    f = np.array([aabbMax[0], aabbMax[1], aabbMax[2]])
-    t = np.array([aabbMin[0], aabbMax[1], aabbMax[2]])
-    vis.draw_2d_line("bb.9", f, t - f, (1, 0.5, 0.5), scale=1)
-    f = np.array([aabbMax[0], aabbMax[1], aabbMax[2]])
-    t = np.array([aabbMax[0], aabbMin[1], aabbMax[2]])
-    vis.draw_2d_line("bb.10", f, t - f, (1, 1.0, 1.0), scale=1)
-    f = np.array([aabbMax[0], aabbMax[1], aabbMax[2]])
-    t = np.array([aabbMax[0], aabbMax[1], aabbMin[2]])
-    vis.draw_2d_line("bb.11", f, t - f, (1, 1.0, 1.0), scale=1)
+def draw_AABB(vis: Visualizer, aabb):
+    pts = aabb_to_ordered_end_points(aabb)
+    draw_ordered_end_points(vis, pts)
