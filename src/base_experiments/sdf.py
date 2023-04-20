@@ -5,6 +5,7 @@ import pytorch_kinematics.transforms.rotation_conversions
 
 import numpy as np
 import torch
+import pybullet as p
 
 from pytorch_volumetric.sdf import ObjectFactory, ObjectFrameSDF
 from base_experiments.env.pybullet_env import closest_point_on_surface, ContactInfo
@@ -16,6 +17,9 @@ class PyBulletNaiveSDF(ObjectFrameSDF):
     def __init__(self, test_obj_id, vis=None):
         self.test_obj_id = test_obj_id
         self.vis = vis
+
+    def surface_bounding_box(self, padding=0.):
+        return torch.tensor(p.getAABB(self.test_obj_id)).transpose(0, 1)
 
     def __call__(self, points_in_object_frame):
         if len(points_in_object_frame.shape) == 2:
@@ -67,5 +71,3 @@ def draw_pose_distribution(link_to_world_tf_matrix, obj_id_map, dd, obj_factory:
         object_id = obj_id_map.get(b, None)
         object_id = obj_factory.draw_mesh(dd, "icp_distribution", (pos, rot), (0.7, 0.7, 0.7, 0.1), object_id=object_id)
         obj_id_map[b] = object_id
-
-

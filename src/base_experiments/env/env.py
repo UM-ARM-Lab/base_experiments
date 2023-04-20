@@ -8,6 +8,7 @@ from arm_pytorch_utilities import load_data as load_utils, array_utils
 from arm_pytorch_utilities.make_data import datasource
 
 from base_experiments import cfg
+from pytorch_volumetric.model_to_sdf import aabb_to_ordered_end_points
 from stucco.detection import ContactDetector
 
 
@@ -310,22 +311,6 @@ class EnvDataSource(datasource.FileDataSource):
         """Get description of returned info columns in name: col slice format"""
         assert isinstance(self.loader, TrajectoryLoader)
         return self.loader.info_desc
-
-
-def aabb_to_ordered_end_points(aabb):
-    aabbMin = aabb[:, 0]
-    aabbMax = aabb[:, 1]
-    pts = np.array([
-        [aabbMin[0], aabbMin[1], aabbMin[2]],
-        [aabbMax[0], aabbMin[1], aabbMin[2]],
-        [aabbMin[0], aabbMax[1], aabbMin[2]],
-        [aabbMin[0], aabbMin[1], aabbMax[2]],
-        [aabbMin[0], aabbMax[1], aabbMax[2]],
-        [aabbMax[0], aabbMin[1], aabbMax[2]],
-        [aabbMax[0], aabbMax[1], aabbMin[2]],
-        [aabbMax[0], aabbMax[1], aabbMax[2]]
-    ])
-    return pts
 
 
 def draw_ordered_end_points(vis: Visualizer, pts):
