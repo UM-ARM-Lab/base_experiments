@@ -193,7 +193,7 @@ class DebugRvizDrawer(Visualizer):
                 self._ns[ns] = set()
             self._ns[ns].add(id)
         elif ns in self._ns:
-            if ns in self._ns:
+            if id in self._ns[ns]:
                 self._ns[ns].remove(id)
                 if len(self._ns[ns]) == 0:
                     del self._ns[ns]
