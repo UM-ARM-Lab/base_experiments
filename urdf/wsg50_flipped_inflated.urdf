@@ -134,7 +134,7 @@
   </link>
   <!-- GRIPPER LEFT -->
   <joint name="wsg50_finger_left_joint" type="prismatic">
-    <limit effort="1.0" lower="-0.055" upper="-0.03" velocity="1.0"/>
+    <limit effort="1.0" lower="-0.055" upper="0.0" velocity="1.0"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <!--origin xyz="-0.0067 0 0.049" rpy="0 0 0" /-->
     <parent link="wsg50_base_link"/>
@@ -182,7 +182,7 @@
   </gazebo>
   <!-- GRIPPER RIGHT -->
   <joint name="wsg50_finger_right_joint" type="prismatic">
-    <limit effort="1.0" lower="0.03" upper="0.055" velocity="1.0"/>
+    <limit effort="1.0" lower="0.0" upper="0.055" velocity="1.0"/>
     <origin rpy="0 0 3.14159" xyz="0 0 0"/>
     <parent link="wsg50_base_link"/>
     <child link="wsg50_gripper_right"/>

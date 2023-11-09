@@ -220,12 +220,15 @@ class PybulletEnv(Env):
 
     @staticmethod
     def _make_robot_translucent(robot_id, alpha=0.4):
-        visual_data = p.getVisualShapeData(robot_id)
-        for link in visual_data:
+        def make_transparent(link):
             link_id = link[1]
             rgba = list(link[7])
             rgba[3] = alpha
             p.changeVisualShape(robot_id, link_id, rgbaColor=rgba)
+
+        visual_data = p.getVisualShapeData(robot_id)
+        for link in visual_data:
+            make_transparent(link)
 
 
 class ContactInfo(enum.IntEnum):

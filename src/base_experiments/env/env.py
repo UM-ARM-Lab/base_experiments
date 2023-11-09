@@ -314,6 +314,7 @@ class EnvDataSource(datasource.FileDataSource):
 
 
 def draw_ordered_end_points(vis: Visualizer, pts):
+    # order_to_rgb = {(i,i+1): (1, 1, 1) for i in range(len(pts) - 1)}
     order_to_rgb = {
         (0, 1): (1, 0, 0),
         (0, 2): (0, 1, 0),
