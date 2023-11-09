@@ -15,7 +15,6 @@ import matplotlib.cm as cmx
 from arm_pytorch_utilities import tensor_utils
 from base_experiments.env.pybullet_env import PybulletEnv, get_total_contact_force, make_box, state_action_color_pairs, \
     ContactInfo, make_cylinder, closest_point_on_surface
-from stucco.movable_sdf import PlanarMovableSDF
 from base_experiments.env.env import InfoKeys, TrajectoryLoader, handle_data_format_for_state_diff, EnvDataSource
 from base_experiments.env.panda import PandaJustGripperID
 from base_experiments import cfg
@@ -514,6 +513,12 @@ class ArmEnv(PybulletEnv):
         state = np.concatenate((self._observe_ee(), self._observe_reaction_force_torque()[0]))
         return state
 
+    def _observe_joints(self):
+        states = p.getJointStates(self.armId, self.armInds)
+        # retrieve just joint position
+        pos = [state[0] for state in states]
+        return pos
+
     def _observe_ee(self, return_z=True, return_orientation=False):
         link_info = p.getLinkState(self.armId, self.endEffectorIndex, computeForwardKinematics=True)
         pos = link_info[4]
@@ -720,7 +725,7 @@ class ArmEnv(PybulletEnv):
 
         # execute push with mini-steps
         for step in range(self.mini_steps):
-            intermediate_ee_pos = interpolate_pos(ee_pos, final_ee_pos, (step + 1) / self.mini_steps)
+            intermediate_ee_pos = linear_interpolate(ee_pos, final_ee_pos, (step + 1) / self.mini_steps)
             self._move_and_wait(intermediate_ee_pos, steps_to_wait=self.wait_sim_step_per_mini_step)
 
         cost, done, info = self._finish_action(old_state, action)
@@ -832,12 +837,6 @@ class ArmJointEnv(ArmEnv):
         state = np.concatenate((self._observe_joints(), self._observe_reaction_force_torque()[0]))
         return state
 
-    def _observe_joints(self):
-        states = p.getJointStates(self.armId, self.armInds[:-1])
-        # retrieve just joint position
-        pos = [state[0] for state in states]
-        return pos
-
     def _move_pusher(self, end):
         # given joint poses directly
         self._send_move_command(end)
@@ -865,7 +864,7 @@ class ArmJointEnv(ArmEnv):
 
         # execute push with mini-steps
         for step in range(self.mini_steps):
-            intermediate_joints = interpolate_pos(old_joints, new_joints, (step + 1) / self.mini_steps)
+            intermediate_joints = linear_interpolate(old_joints, new_joints, (step + 1) / self.mini_steps)
             # use fixed end effector angle
             intermediate_joints = np.r_[intermediate_joints, 0]
             self._move_and_wait(intermediate_joints, steps_to_wait=self.wait_sim_step_per_mini_step)
@@ -1035,7 +1034,7 @@ class PlanarArmEnv(ArmEnv):
 
         # execute push with mini-steps
         for step in range(self.mini_steps):
-            intermediate_ee_pos = interpolate_pos(ee_pos, final_ee_pos, (step + 1) / self.mini_steps)
+            intermediate_ee_pos = linear_interpolate(ee_pos, final_ee_pos, (step + 1) / self.mini_steps)
             self._move_and_wait(intermediate_ee_pos, steps_to_wait=self.wait_sim_step_per_mini_step)
 
         cost, done, info = self._finish_action(old_state, action)
@@ -1552,7 +1551,188 @@ class ObjectRetrievalEnv(FloatingGripperEnv):
         return None, False
 
 
-def interpolate_pos(start, end, t):
+class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
+    # x y z yaw
+    nx = 4
+    nu = 4
+    MAX_PER_ACTION_DYAW = 0.5
+
+    @staticmethod
+    def state_names():
+        return ['x ee (m)', 'y ee (m)', 'z ee (m)', 'yaw ee (rad)']
+
+    @staticmethod
+    def get_control_bounds():
+        u_min = np.array([-1, -1, -1, -1])
+        u_max = np.array([1, 1, 1, 1])
+        return u_min, u_max
+
+    @classmethod
+    @handle_data_format_for_state_diff
+    def state_difference(cls, state, other_state):
+        """Get state - other_state in state space"""
+        dpos = state[:, :3] - other_state[:, :3]
+        dyaw = state[:, 3] - other_state[:, 3]
+        return dpos, dyaw
+
+    @classmethod
+    def state_cost(cls):
+        return np.diag([1, 1, 1, 0.3])
+
+    # def __init__(self, goal=(0.5, -0.3, 0), init=(-.0, 0.0), **kwargs):
+    #     # here goal is the initial pose of the target object
+    #     super(FloatingGripperEnv, self).__init__(goal=goal, init=init, camera_dist=0.8, **kwargs)
+
+    def _obs(self):
+        # this is of the gripper's origin, not of the last link on the arm
+        pos, quat = self._observe_ee(return_z=True, return_orientation=True)
+        # rpy from xyzw
+        roll, pitch, yaw = p.getEulerFromQuaternion(quat)
+        return pos + (yaw,)
+
+    def _setup_gripper(self):
+        # default orientation of the end effector
+        # self.endEffectorOrientation = p.getQuaternionFromEuler([0, np.pi / 2, 0])
+        self.endEffectorOrientation = self.get_ee_orientation_with_yaw(np.pi)
+
+        # TODO parameterize arm base and orientation
+        self.armId = p.loadURDF("kuka_iiwa/model.urdf", [0, 0, 0], useFixedBase=True)
+        baseOrientation = p.getQuaternionFromEuler([0, 0, np.pi])
+        p.resetBasePositionAndOrientation(self.armId, [-0.45, 0, 0], baseOrientation)
+        self.endEffectorIndex = kukaEndEffectorIndex
+        self.numJoints = p.getNumJoints(self.armId)
+        self.armInds = [i for i in range(self.numJoints)]
+        self._calculate_init_joints()
+        for i in self.armInds:
+            p.resetJointState(self.armId, i, self.initJoints[i])
+
+        self.gripperId = p.loadURDF(os.path.join(cfg.URDF_DIR, "wsg50_flipped_inflated.urdf"),
+                                    basePosition=self.init, baseOrientation=self.endEffectorOrientation,
+                                    useFixedBase=False)
+
+        # attach gripper to the end effector
+        self.gripperOffset = [0, 0, -0.026]
+        self.gripperConstraint = p.createConstraint(self.armId, self.endEffectorIndex, self.gripperId, -1,
+                                                    p.JOINT_FIXED, [0, 0, 1], [0, 0, 0], self.gripperOffset)
+
+        # disable collision between the gripper and the arm
+        for kuka_link_index in range(p.getNumJoints(self.armId)):
+            for gripper_link_index in range(p.getNumJoints(self.gripperId)):
+                p.setCollisionFilterPair(self.armId, self.gripperId, kuka_link_index, gripper_link_index,
+                                         enableCollision=0)
+
+        # resolve constraints and recalculate init joints
+        self.close_gripper()
+        for _ in range(100):
+            p.stepSimulation()
+        self.initJoints = self._observe_joints()
+
+        # gripper has no mass so does not interact with the world dynamically; we give it a mass
+        gripper_base_mass = 0.2
+        p.changeDynamics(self.gripperId, -1, mass=gripper_base_mass)
+
+        # self._make_robot_translucent(self.armId)
+        # self._make_robot_translucent(self.gripperId)
+
+    def _move_pusher(self, eePose):
+        eePos = eePose[0]
+        eeRot = eePose[1]
+        jointPoses = p.calculateInverseKinematics(self.armId,
+                                                  self.endEffectorIndex,
+                                                  eePos,
+                                                  eeRot)
+        self._send_move_command(jointPoses)
+        self.close_gripper()
+
+    def step(self, action):
+        self._clear_state_before_step()
+
+        action = np.clip(action, *self.get_control_bounds())
+        # normalize action such that the input can be within a fixed range
+        old_state = np.copy(self.state)
+        dx, dy, dz, dyaw = self._unpack_action(action)
+
+        # get SE(3) of end effector
+        # note that we need to get the end of the arm, not the gripper (they are offset with a constant transform)
+        # get position and orientation of the end effector of the arm in world frame
+        end_effector_state = p.getLinkState(self.armId, self.endEffectorIndex)
+        pos = end_effector_state[0]
+        quat = end_effector_state[1]
+        rpy = p.getEulerFromQuaternion(quat)
+        final_pos = np.array((pos[0] + dx, pos[1] + dy, pos[2] + dz))
+        final_rpy = np.array((0, -math.pi / 2, rpy[2] + dyaw))
+        final_quat = p.getQuaternionFromEuler(final_rpy)
+
+        # do interpolation in joint space instead of ee space
+        cur_joints = self._observe_joints()
+        final_joints = p.calculateInverseKinematics(self.armId,
+                                                    self.endEffectorIndex,
+                                                    final_pos,
+                                                    final_quat)
+
+        if self._debug_visualizations[DebugVisualization.ACTION]:
+            self._draw_action(action)
+            self._dd.draw_point('final eepos', final_pos, color=(1, 0.5, 0.5))
+
+        # execute push with mini-steps
+        for step in range(self.mini_steps):
+            intermediate_joints = linear_interpolate(np.array(cur_joints), np.array(final_joints),
+                                                     (step + 1) / self.mini_steps)
+            self._move_and_wait_joints(intermediate_joints, steps_to_wait=self.wait_sim_step_per_mini_step)
+
+        cost, done, info = self._finish_action(old_state, action)
+
+        return np.copy(self.state), -cost, done, info
+
+    def evaluate_cost(self, state, action=None):
+        return 0, False
+
+    def _move_and_wait_joints(self, joints, steps_to_wait=50):
+        # execute the action
+        self.last_ee_pos = self._observe_ee(return_z=True)
+        self._send_move_command(joints)
+        self.close_gripper()
+
+        p.stepSimulation()
+        for _ in range(steps_to_wait):
+            self._observe_info()
+            p.stepSimulation()
+            if self.mode is p.GUI and self.sim_step_wait:
+                time.sleep(self.sim_step_wait)
+        self._observe_info()
+
+    def _unpack_action(self, action):
+        dx = action[0] * self.MAX_PUSH_DIST
+        dy = action[1] * self.MAX_PUSH_DIST
+        dz = action[2] * self.MAX_PUSH_DIST
+        dyaw = action[3] * self.MAX_PER_ACTION_DYAW
+        return dx, dy, dz, dyaw
+
+    def reset(self):
+        for _ in range(1000):
+            p.stepSimulation()
+
+        for obj in self.immovable + self.movable:
+            p.removeBody(obj)
+        self._setup_objects()
+
+        self.open_gripper()
+        for i in self.armInds:
+            p.resetJointState(self.armId, i, self.initJoints[i])
+
+        # set robot init config
+        self._clear_state_between_control_steps()
+        # start at rest
+        for _ in range(1000):
+            p.stepSimulation()
+        self.state = self._obs()
+        if self._debug_visualizations[DebugVisualization.STATE]:
+            self._dd.draw_point('x0', self.get_ee_pos(self.state), color=(0, 1, 0))
+        self.contact_detector.clear()
+        return np.copy(self.state)
+
+
+def linear_interpolate(start, end, t):
     return t * end + (1 - t) * start
 
 
@@ -1565,7 +1745,7 @@ class ArmDataSource(EnvDataSource):
     @staticmethod
     def _loader_map(env_type):
         loader_map = {ArmEnv: ArmLoader, ArmJointEnv: ArmLoader, PlanarArmEnv: ArmLoader, FloatingGripperEnv: ArmLoader,
-                      ObjectRetrievalEnv: ArmLoader}
+                      ObjectRetrievalEnv: ArmLoader, ObjectRetrievalArmEnv: ArmLoader}
         return loader_map.get(env_type, None)
 
 
