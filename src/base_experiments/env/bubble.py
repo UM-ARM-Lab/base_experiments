@@ -1562,6 +1562,15 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         return ['x ee (m)', 'y ee (m)', 'z ee (m)', 'yaw ee (rad)']
 
     @staticmethod
+    def get_ee_pos(state):
+        return state[:3]
+
+    @staticmethod
+    @tensor_utils.ensure_2d_input
+    def get_ee_pos_states(states):
+        return states[:, :3]
+
+    @staticmethod
     def get_control_bounds():
         u_min = np.array([-1, -1, -1, -1])
         u_max = np.array([1, 1, 1, 1])
@@ -1590,6 +1599,16 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         roll, pitch, yaw = p.getEulerFromQuaternion(quat)
         return pos + (yaw,)
 
+    def _calculate_init_joints(self):
+        # take into account the gripper offset since state is for the gripper origin
+        # this offset is relative to the end effector orientation, so we need to transform it to world frame
+        offsetWorldFrame = p.rotateVector(self.endEffectorOrientation, self.gripperOffset)
+        pos = np.array(self.init) + np.array(offsetWorldFrame) * 2
+        self.initJoints = list(p.calculateInverseKinematics(self.armId,
+                                                            self.endEffectorIndex,
+                                                            pos,
+                                                            self.endEffectorOrientation))
+
     def _setup_gripper(self):
         # default orientation of the end effector
         # self.endEffectorOrientation = p.getQuaternionFromEuler([0, np.pi / 2, 0])
@@ -1598,20 +1617,24 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         # TODO parameterize arm base and orientation
         self.armId = p.loadURDF("kuka_iiwa/model.urdf", [0, 0, 0], useFixedBase=True)
         baseOrientation = p.getQuaternionFromEuler([0, 0, np.pi])
-        p.resetBasePositionAndOrientation(self.armId, [-0.45, 0, 0], baseOrientation)
+        p.resetBasePositionAndOrientation(self.armId, [-0.5, 0, 0], baseOrientation)
         self.endEffectorIndex = kukaEndEffectorIndex
         self.numJoints = p.getNumJoints(self.armId)
         self.armInds = [i for i in range(self.numJoints)]
-        self._calculate_init_joints()
-        for i in self.armInds:
-            p.resetJointState(self.armId, i, self.initJoints[i])
+
+        self.gripperOffset = [0, 0, -0.026]
+
+        # can get stuck in local minima
+        for _ in range(3):
+            self._calculate_init_joints()
+            for i in self.armInds:
+                p.resetJointState(self.armId, i, self.initJoints[i])
 
         self.gripperId = p.loadURDF(os.path.join(cfg.URDF_DIR, "wsg50_flipped_inflated.urdf"),
                                     basePosition=self.init, baseOrientation=self.endEffectorOrientation,
                                     useFixedBase=False)
 
         # attach gripper to the end effector
-        self.gripperOffset = [0, 0, -0.026]
         self.gripperConstraint = p.createConstraint(self.armId, self.endEffectorIndex, self.gripperId, -1,
                                                     p.JOINT_FIXED, [0, 0, 1], [0, 0, 0], self.gripperOffset)
 
@@ -1628,21 +1651,12 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         self.initJoints = self._observe_joints()
 
         # gripper has no mass so does not interact with the world dynamically; we give it a mass
-        gripper_base_mass = 0.2
-        p.changeDynamics(self.gripperId, -1, mass=gripper_base_mass)
+        self.gripper_base_mass = 0.2
+        p.changeDynamics(self.gripperId, -1, mass=self.gripper_base_mass)
 
-        # self._make_robot_translucent(self.armId)
-        # self._make_robot_translucent(self.gripperId)
-
-    def _move_pusher(self, eePose):
-        eePos = eePose[0]
-        eeRot = eePose[1]
-        jointPoses = p.calculateInverseKinematics(self.armId,
-                                                  self.endEffectorIndex,
-                                                  eePos,
-                                                  eeRot)
-        self._send_move_command(jointPoses)
-        self.close_gripper()
+        self._dd.toggle_3d(True)
+        self._make_robot_translucent(self.armId)
+        self._make_robot_translucent(self.gripperId)
 
     def step(self, action):
         self._clear_state_before_step()
@@ -1656,22 +1670,33 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         # note that we need to get the end of the arm, not the gripper (they are offset with a constant transform)
         # get position and orientation of the end effector of the arm in world frame
         end_effector_state = p.getLinkState(self.armId, self.endEffectorIndex)
-        pos = end_effector_state[0]
-        quat = end_effector_state[1]
+        # note that 0 and 1 is for the center of mass rather than the origin of the link
+        pos = end_effector_state[4]
+        quat = end_effector_state[5]
+
         rpy = p.getEulerFromQuaternion(quat)
+
         final_pos = np.array((pos[0] + dx, pos[1] + dy, pos[2] + dz))
-        final_rpy = np.array((0, -math.pi / 2, rpy[2] + dyaw))
+        final_rpy = np.array((rpy[0], -math.pi / 2, rpy[2] + dyaw))
         final_quat = p.getQuaternionFromEuler(final_rpy)
 
         # do interpolation in joint space instead of ee space
         cur_joints = self._observe_joints()
-        final_joints = p.calculateInverseKinematics(self.armId,
-                                                    self.endEffectorIndex,
-                                                    final_pos,
-                                                    final_quat)
+
+        # have to do this to avoid getting stuck in local minima
+        for _ in range(3):
+            final_joints = p.calculateInverseKinematics(self.armId,
+                                                        self.endEffectorIndex,
+                                                        final_pos,
+                                                        final_quat)
+            for i in self.armInds:
+                p.resetJointState(self.armId, i, final_joints[i])
+        # reset back to actually execute it
+        for i in self.armInds:
+            p.resetJointState(self.armId, i, cur_joints[i])
 
         if self._debug_visualizations[DebugVisualization.ACTION]:
-            self._draw_action(action)
+            self._draw_action(action, old_state=pos)
             self._dd.draw_point('final eepos', final_pos, color=(1, 0.5, 0.5))
 
         # execute push with mini-steps
