@@ -1538,10 +1538,12 @@ class ObjectRetrievalEnv(FloatingGripperEnv):
                                            [0.3, -0.15, z],
                                            p.getQuaternionFromEuler([0, 0, 0.]), flags=flags, globalScaling=1.5))
         elif self.level == Levels.MUG:
-            self.movable.append(p.loadURDF(os.path.join(cfg.URDF_DIR, 'mug_dbl.urdf'),
+            obj = p.loadURDF(os.path.join(cfg.URDF_DIR, 'mug_dbl.urdf'),
                                            [self.goal[0], self.goal[1], z],
                                            p.getQuaternionFromEuler([np.pi / 2, 0, -self.goal[2]]), flags=flags,
-                                           globalScaling=1.0))
+                                           globalScaling=1.0)
+            p.changeDynamics(obj, -1, mass=3)
+            self.movable.append(obj)
 
         for objId in self.immovable:
             p.changeVisualShape(objId, -1, rgbaColor=[0.2, 0.2, 0.2, 0.8])
