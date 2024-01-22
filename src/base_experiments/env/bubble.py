@@ -186,7 +186,9 @@ class ArmEnv(PybulletEnv):
                  debug_visualizations=None, dist_for_done=0.04, camera_dist=1.5,
                  contact_residual_threshold=1.,
                  contact_residual_precision=None,
-                 reaction_force_strategy=ReactionForceStrategy.MEDIAN_OVER_MINI_STEPS, **kwargs):
+                 reaction_force_strategy=ReactionForceStrategy.MEDIAN_OVER_MINI_STEPS,
+                 observe_additional_info_fn=None,
+                 **kwargs):
         """
         :param environment_level: what obstacles should show up in the environment
         :param sim_step_wait: how many seconds to wait between each sim step to show intermediate states
@@ -203,6 +205,7 @@ class ArmEnv(PybulletEnv):
         Typically estimated from the training set, but for simulated environments can just pass in 1/max training value
         for normalization.
         :param reaction_force_strategy how to aggregate measured reaction forces over control step into 1 value
+        :param observe_additional_info_fn function with a dictionary info argument that's run to observe high frequency state
         :param kwargs:
         """
         super().__init__(**kwargs, default_debug_height=0.1, camera_dist=camera_dist)
@@ -214,6 +217,7 @@ class ArmEnv(PybulletEnv):
         self.wait_sim_step_per_mini_step = wait_sim_steps_per_mini_step
         self.reaction_force_strategy = reaction_force_strategy
         self.dist_for_done = dist_for_done
+        self.observe_additional_info_fn = observe_additional_info_fn
 
         # object IDs
         self.immovable = []
@@ -559,6 +563,8 @@ class ArmEnv(PybulletEnv):
         info = {}
 
         self._observe_additional_info(info, visualize)
+        if self.observe_additional_info_fn is not None:
+            self.observe_additional_info_fn(info)
         self._sim_step += 1
 
         for key, value in info.items():
@@ -626,7 +632,7 @@ class ArmEnv(PybulletEnv):
             info[name] = info[name].sum(axis=0)
         else:
             info[name] = np.zeros(3)
-        most_frequent_contact = scipy.stats.mode(self._mini_step_contact['id'])
+        most_frequent_contact = scipy.stats.mode(self._mini_step_contact['id'], keepdims=True)
         info[InfoKeys.CONTACT_ID] = int(most_frequent_contact[0])
 
         # ground truth object information
@@ -1401,7 +1407,6 @@ class FloatingGripperEnv(PlanarArmEnv):
         p.resetBasePositionAndOrientation(self.gripperId, self.init, self.endEffectorOrientation)
         self.gripperConstraint = p.createConstraint(self.gripperId, -1, -1, -1, p.JOINT_FIXED, [0, 0, 1], [0, 0, 0],
                                                     self.init, childFrameOrientation=self.endEffectorOrientation)
-        self.close_gripper()
 
         # set robot init config
         self._clear_state_between_control_steps()
@@ -1539,9 +1544,9 @@ class ObjectRetrievalEnv(FloatingGripperEnv):
                                            p.getQuaternionFromEuler([0, 0, 0.]), flags=flags, globalScaling=1.5))
         elif self.level == Levels.MUG:
             obj = p.loadURDF(os.path.join(cfg.URDF_DIR, 'mug_dbl.urdf'),
-                                           [self.goal[0], self.goal[1], z],
-                                           p.getQuaternionFromEuler([np.pi / 2, 0, -self.goal[2]]), flags=flags,
-                                           globalScaling=1.0)
+                             [self.goal[0], self.goal[1], z],
+                             p.getQuaternionFromEuler([np.pi / 2, 0, -self.goal[2]]), flags=flags,
+                             globalScaling=1.0)
             p.changeDynamics(obj, -1, mass=3)
             self.movable.append(obj)
 
@@ -1739,13 +1744,25 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         for _ in range(1000):
             p.stepSimulation()
 
+        if self.gripperConstraint:
+            p.removeConstraint(self.gripperConstraint)
+        p.resetBasePositionAndOrientation(self.gripperId, self.init, self.endEffectorOrientation)
+        self.gripperConstraint = p.createConstraint(self.armId, self.endEffectorIndex, self.gripperId, -1,
+                                                    p.JOINT_FIXED, [0, 0, 1], [0, 0, 0], self.gripperOffset)
+
+        for i in self.armInds:
+            p.resetJointState(self.armId, i, self.initJoints[i])
+        self._move_and_wait_joints(self.initJoints)
+
         for obj in self.immovable + self.movable:
             p.removeBody(obj)
         self._setup_objects()
 
-        self.open_gripper()
-        for i in self.armInds:
-            p.resetJointState(self.armId, i, self.initJoints[i])
+        self._dd.clear_visualizations()
+
+        for obj in self.immovable + self.movable:
+            p.removeBody(obj)
+        self._setup_objects()
 
         # set robot init config
         self._clear_state_between_control_steps()
