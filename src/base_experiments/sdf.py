@@ -18,8 +18,12 @@ class PyBulletNaiveSDF(ObjectFrameSDF):
         self.test_obj_id = test_obj_id
         self.vis = vis
 
-    def surface_bounding_box(self, padding=0.):
-        return torch.tensor(p.getAABB(self.test_obj_id)).transpose(0, 1)
+    def surface_bounding_box(self, padding=0., padding_ratio=0.):
+        bb = torch.tensor(p.getAABB(self.test_obj_id)).transpose(0, 1)
+        extents = bb[:, 1] - bb[:, 0]
+        bb[:, 0] -= padding + padding_ratio * extents
+        bb[:, 1] += padding + padding_ratio * extents
+        return bb
 
     def __call__(self, points_in_object_frame):
         if len(points_in_object_frame.shape) == 2:

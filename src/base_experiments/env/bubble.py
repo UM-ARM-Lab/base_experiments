@@ -246,6 +246,7 @@ class ArmEnv(PybulletEnv):
         # avoid the spike at the start of each mini step from rapid acceleration
         self._steps_since_start_to_get_reaction = 5
         self._clear_state_between_control_steps()
+        self._abort_movement = False
 
         self.set_task_config(goal, init)
         self._setup_experiment()
@@ -696,6 +697,9 @@ class ArmEnv(PybulletEnv):
                                     positionGains=[0.3] * num_arm_indices,
                                     velocityGains=[1] * num_arm_indices)
 
+    def abort_movement(self):
+        self._abort_movement = True
+
     def _move_and_wait(self, eePos, steps_to_wait=50):
         # execute the action
         self.last_ee_pos = self._observe_ee(return_z=True)
@@ -704,6 +708,8 @@ class ArmEnv(PybulletEnv):
         for _ in range(steps_to_wait):
             self._observe_info()
             p.stepSimulation()
+            if self._abort_movement:
+                break
             if self.mode is p.GUI and self.sim_step_wait:
                 time.sleep(self.sim_step_wait)
         self._observe_info()
@@ -729,10 +735,13 @@ class ArmEnv(PybulletEnv):
             self._draw_action(action)
             self._dd.draw_point('final eepos', final_ee_pos, color=(1, 0.5, 0.5))
 
+        self._abort_movement = False
         # execute push with mini-steps
         for step in range(self.mini_steps):
             intermediate_ee_pos = linear_interpolate(ee_pos, final_ee_pos, (step + 1) / self.mini_steps)
             self._move_and_wait(intermediate_ee_pos, steps_to_wait=self.wait_sim_step_per_mini_step)
+            if self._abort_movement:
+                break
 
         cost, done, info = self._finish_action(old_state, action)
 
@@ -869,11 +878,14 @@ class ArmJointEnv(ArmEnv):
         new_joints = old_joints + dq
 
         # execute push with mini-steps
+        self._abort_movement = False
         for step in range(self.mini_steps):
             intermediate_joints = linear_interpolate(old_joints, new_joints, (step + 1) / self.mini_steps)
             # use fixed end effector angle
             intermediate_joints = np.r_[intermediate_joints, 0]
             self._move_and_wait(intermediate_joints, steps_to_wait=self.wait_sim_step_per_mini_step)
+            if self._abort_movement:
+                break
 
         cost, done, info = self._finish_action(old_state, action)
 
@@ -1039,9 +1051,12 @@ class PlanarArmEnv(ArmEnv):
             self._dd.draw_point('final eepos', final_ee_pos, color=(1, 0.5, 0.5))
 
         # execute push with mini-steps
+        self._abort_movement = False
         for step in range(self.mini_steps):
             intermediate_ee_pos = linear_interpolate(ee_pos, final_ee_pos, (step + 1) / self.mini_steps)
             self._move_and_wait(intermediate_ee_pos, steps_to_wait=self.wait_sim_step_per_mini_step)
+            if self._abort_movement:
+                break
 
         cost, done, info = self._finish_action(old_state, action)
         rew = -cost if cost is not None else None
