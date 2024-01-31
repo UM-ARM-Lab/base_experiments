@@ -3,6 +3,7 @@ import math
 import pybullet as p
 import time
 import enum
+
 import torch
 import os
 import random
@@ -354,7 +355,7 @@ class ArmEnv(PybulletEnv):
         # self.armId = p.loadSDF("kuka_iiwa/kuka_with_gripper2.sdf")[0]
         # self.armId = p.loadURDF("franka_panda/panda.urdf", useFixedBase=True)
         self.armId = p.loadURDF("kuka_iiwa/model.urdf", [0, 0, 0], useFixedBase=True)
-        p.resetBasePositionAndOrientation(self.armId, [0, 0, 0], [0, 0, 0, 1])
+        self.reset_base_link_frame(self.armId, [0, 0, 0], [0, 0, 0])
 
         # TODO modify dynamics to induce traps
         # for j in range(p.getNumJoints(self.armId)):
@@ -1013,8 +1014,7 @@ class PlanarArmEnv(ArmEnv):
     def _setup_gripper(self):
         # add kuka arm
         self.armId = p.loadURDF("kuka_iiwa/model.urdf", [0, 0, 0], useFixedBase=True)
-        p.resetBasePositionAndOrientation(self.armId, [0, 0, FIXED_Z * 2],
-                                          p.getQuaternionFromEuler([math.pi / 2, 0, math.pi / 2]))
+        self.reset_base_link_frame(self.armId, [0, 0, FIXED_Z], [math.pi / 2, 0, math.pi / 2])
 
         # orientation of the end effector
         self.endEffectorOrientation = p.getQuaternionFromEuler([0, math.pi / 2, 0])
@@ -1637,9 +1637,13 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         self.endEffectorOrientation = self.get_ee_orientation_with_yaw(np.pi)
 
         # TODO parameterize arm base and orientation
-        self.armId = p.loadURDF("kuka_iiwa/model.urdf", [0, 0, 0], useFixedBase=True)
-        baseOrientation = p.getQuaternionFromEuler([0, 0, np.pi])
-        p.resetBasePositionAndOrientation(self.armId, [-0.5, 0, 0], baseOrientation)
+        # p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        # arm_path = os.path.join(pybullet_data.getDataPath(), "kuka_iiwa/model.urdf")
+        pos = [-0.5, 0, 0]
+        rpy = [0., 0., np.pi]
+        self.armId = p.loadURDF("kuka_iiwa/model.urdf", pos, p.getQuaternionFromEuler(rpy), useFixedBase=True)
+        self.reset_base_link_frame(self.armId, pos, rpy)
+
         self.endEffectorIndex = kukaEndEffectorIndex
         self.numJoints = p.getNumJoints(self.armId)
         self.armInds = [i for i in range(self.numJoints)]

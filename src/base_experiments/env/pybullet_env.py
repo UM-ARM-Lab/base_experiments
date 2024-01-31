@@ -11,6 +11,7 @@ from datetime import datetime
 
 import torch
 from arm_pytorch_utilities import math_utils
+import pytorch_kinematics as pk
 
 import pybullet_data
 from base_experiments.env.env import Visualizer, Env, Mode
@@ -229,6 +230,37 @@ class PybulletEnv(Env):
         visual_data = p.getVisualShapeData(robot_id)
         for link in visual_data:
             make_transparent(link)
+
+    @staticmethod
+    def get_com_tf(robot_id):
+        info = p.getDynamicsInfo(robot_id, -1)
+        pos_com = torch.tensor(info[3])
+        xyzw_com = torch.tensor(info[4])
+        return pk.Transform3d(pos=pos_com, rot=pk.xyzw_to_wxyz(xyzw_com))
+
+    @staticmethod
+    def reset_base_link_frame(robot_id, pos, rpy):
+        """pybullet uses the center of mass for get/reset base position and orientation, this provides an alternative
+        to specifying the base link frame."""
+        com_tf = PybulletEnv.get_com_tf(robot_id)
+        baseOrientation = p.getQuaternionFromEuler(rpy)
+        # convert to COM frame
+        world_to_base_tf = pk.Transform3d(pos=torch.tensor(pos),
+                                          rot=pk.xyzw_to_wxyz(torch.tensor(baseOrientation)))
+        world_to_base_com_tf = world_to_base_tf.compose(com_tf)
+        pos, xyzw = pk.rotation_conversions.matrix_to_pos_rot(world_to_base_com_tf.get_matrix())
+        p.resetBasePositionAndOrientation(robot_id, pos[0], xyzw[0])
+
+    @staticmethod
+    def get_base_link_frame(robot_id):
+        """pybullet uses the center of mass for get/reset base position and orientation, this provides an alternative
+        for retrieving the base link frame."""
+        com_tf = PybulletEnv.get_com_tf(robot_id)
+        pos, xyzw = p.getBasePositionAndOrientation(robot_id)
+        world_to_base_com_tf = pk.Transform3d(pos=torch.tensor(pos),
+                                              rot=pk.xyzw_to_wxyz(torch.tensor(xyzw)))
+        world_to_base_tf = world_to_base_com_tf.compose(com_tf.inverse())
+        return world_to_base_tf
 
 
 class ContactInfo(enum.IntEnum):
