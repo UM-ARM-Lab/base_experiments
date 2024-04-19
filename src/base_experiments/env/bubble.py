@@ -899,9 +899,6 @@ class ArmJointEnv(ArmEnv):
         pass
 
 
-FIXED_Z = 0.1
-
-
 class PlanarArmEnv(ArmEnv):
     """To start with we have a fixed gripper orientation so the state is 3D position only"""
     nu = 2
@@ -912,11 +909,10 @@ class PlanarArmEnv(ArmEnv):
         # TODO allow theta rotation (see block push)
         return ['x ee (m)', 'y ee (m)', '$r_x$ (N)', '$r_y$ (N)']
 
-    @staticmethod
-    def get_ee_pos(state):
+    def get_ee_pos(self, state):
         if torch.is_tensor(state):
-            return torch.cat((state[:2], torch.tensor(FIXED_Z, dtype=state.dtype, device=state.device).view(1)))
-        return np.r_[state[:2], FIXED_Z]
+            return torch.cat((state[:2], torch.tensor(self.z, dtype=state.dtype, device=state.device).view(1)))
+        return np.r_[state[:2], self.z]
 
     @staticmethod
     @tensor_utils.ensure_2d_input
@@ -964,8 +960,9 @@ class PlanarArmEnv(ArmEnv):
             diff = diff.reshape(1, -1)
         return diff
 
-    def __init__(self, goal=(1.0, -0.4), init=(0.5, 0.8), **kwargs):
-        super(PlanarArmEnv, self).__init__(goal=goal, init=tuple(init) + (FIXED_Z,), **kwargs)
+    def __init__(self, goal=(1.0, -0.4), init=(0.5, 0.8), z=0.1, **kwargs):
+        self.z = z
+        super(PlanarArmEnv, self).__init__(goal=goal, init=tuple(init) + (self.z,), **kwargs)
 
     def _observe_ee(self, return_z=False, **kwargs):
         return super(PlanarArmEnv, self)._observe_ee(return_z=return_z, **kwargs)
@@ -980,12 +977,12 @@ class PlanarArmEnv(ArmEnv):
         # ignore the pusher position
         self.goal = np.array(tuple(goal) + (0, 0))
         if self._debug_visualizations[DebugVisualization.GOAL]:
-            self._dd.draw_point('goal', tuple(goal) + (FIXED_Z,))
+            self._dd.draw_point('goal', tuple(goal) + (self.z,))
 
     def _set_init(self, init):
         if len(init) > 2:
             init = init[:2]
-        super(PlanarArmEnv, self)._set_init(tuple(init) + (FIXED_Z,))
+        super(PlanarArmEnv, self)._set_init(tuple(init) + (self.z,))
 
     def _setup_objects(self):
         self.immovable = []
@@ -1014,7 +1011,7 @@ class PlanarArmEnv(ArmEnv):
     def _setup_gripper(self):
         # add kuka arm
         self.armId = p.loadURDF("kuka_iiwa/model.urdf", [0, 0, 0], useFixedBase=True)
-        self.reset_base_link_frame(self.armId, [0, 0, FIXED_Z], [math.pi / 2, 0, math.pi / 2])
+        self.reset_base_link_frame(self.armId, [0, 0, self.z], [math.pi / 2, 0, math.pi / 2])
 
         # orientation of the end effector
         self.endEffectorOrientation = p.getQuaternionFromEuler([0, math.pi / 2, 0])
@@ -1045,7 +1042,7 @@ class PlanarArmEnv(ArmEnv):
         dx, dy = self._unpack_action(action)
 
         ee_pos = self.get_ee_pos(old_state)
-        final_ee_pos = np.array((ee_pos[0] + dx, ee_pos[1] + dy, FIXED_Z))
+        final_ee_pos = np.array((ee_pos[0] + dx, ee_pos[1] + dy, self.z))
         if self._debug_visualizations[DebugVisualization.ACTION]:
             self._draw_action(action)
             self._dd.draw_point('final eepos', final_ee_pos, color=(1, 0.5, 0.5))
@@ -1068,12 +1065,12 @@ class PlanarArmEnv(ArmEnv):
         if self._debug_visualizations[DebugVisualization.STATE]:
             self._dd.draw_point('state', pos)
         if self._debug_visualizations[DebugVisualization.REACTION_IN_STATE]:
-            self._draw_reaction_force(np.r_[self.state[2:], FIXED_Z], 'sr', (0, 0, 0))
+            self._draw_reaction_force(np.r_[self.state[2:], self.z], 'sr', (0, 0, 0))
 
     def _draw_action(self, action, old_state=None, debug=0):
         if old_state is None:
             old_state = self._obs()
-        start = np.r_[old_state[:2], FIXED_Z]
+        start = np.r_[old_state[:2], self.z]
         pointer = np.r_[action, 0]
         if debug:
             self._dd.draw_2d_line('u{}'.format(debug), start, pointer, (1, debug / 30, debug / 10), scale=0.2)
@@ -1096,7 +1093,7 @@ class FloatingGripperEnv(PlanarArmEnv):
 
     # --- set current state
     def set_state(self, state, action=None):
-        p.resetBasePositionAndOrientation(self.gripperId, (state[0], state[1], FIXED_Z),
+        p.resetBasePositionAndOrientation(self.gripperId, (state[0], state[1], self.z),
                                           self.endEffectorOrientation)
         self.state = state
         self._draw_state()
@@ -1464,7 +1461,7 @@ class ObjectRetrievalEnv(FloatingGripperEnv):
         # ignore the pusher position
         self.goal = np.array(goal)
         if self._debug_visualizations[DebugVisualization.GOAL]:
-            self._dd.draw_point('goal', [goal[0], goal[1], FIXED_Z])
+            self._dd.draw_point('goal', [goal[0], goal[1], self.z])
 
     def _obs(self):
         return super(ObjectRetrievalEnv, self)._obs()[:2]
