@@ -9,16 +9,16 @@
     <visual>
       <origin rpy="0 0 1.57" xyz="0 0 0"/>
       <geometry>
-				<mesh filename="package://meshes/mug_dbl.obj" scale="1 1 1"/>
+				<mesh filename="package://meshes/mug_dbl_small.obj" scale="1 1 1"/>
       </geometry>
        <material name="green">
-        <color rgba="0.4 1 0.4 0.5"/>
+        <color rgba="0.4 1 0.4 1"/>
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
-				<mesh filename="package://meshes/mug_dbl.obj" scale="1 1 1"/>
+				<mesh filename="package://meshes/mug_dbl_small_filled.obj" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
