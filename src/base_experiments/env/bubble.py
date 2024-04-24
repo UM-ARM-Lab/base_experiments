@@ -700,6 +700,9 @@ class ArmEnv(PybulletEnv):
 
     def abort_movement(self):
         self._abort_movement = True
+        # observe where we are and then move pusher to our current location
+        current_ee = self._observe_ee(return_z=True)
+        self._move_pusher(current_ee)
 
     def _move_and_wait(self, eePos, steps_to_wait=50):
         # execute the action
@@ -1053,6 +1056,8 @@ class PlanarArmEnv(ArmEnv):
             intermediate_ee_pos = linear_interpolate(ee_pos, final_ee_pos, (step + 1) / self.mini_steps)
             self._move_and_wait(intermediate_ee_pos, steps_to_wait=self.wait_sim_step_per_mini_step)
             if self._abort_movement:
+                for _ in range(100):
+                    p.stepSimulation()
                 break
 
         cost, done, info = self._finish_action(old_state, action)
