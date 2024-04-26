@@ -9,7 +9,7 @@
     <visual>
       <origin rpy="0 0 1.57" xyz="0 0 0"/>
       <geometry>
-				<mesh filename="package://meshes/mug_dbl.obj" scale="1 1 1"/>
+				<mesh filename="package://meshes/mug_comp/mug_dbl.obj" scale="1 1 1"/>
       </geometry>
        <material name="green">
         <color rgba="0.4 1 0.4 0.5"/>
@@ -18,8 +18,386 @@
     <collision>
       <origin rpy="0 0 1.57" xyz="0 0 0"/>
      <geometry>
-				<mesh filename="package://meshes/mug_dbl.obj" scale="1 1 1"/>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled.obj" scale="1 1 1"/>
       </geometry>
     </collision>
   </link>
+    <link name="link1">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled1.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled1.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link2">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled2.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled2.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link3">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled3.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled3.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link4">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled4.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled4.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link5">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled5.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled5.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link6">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled6.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled6.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link7">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled7.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled7.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link8">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled8.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled8.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link9">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled9.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled9.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link10">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled10.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled10.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+    <link name="link11">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled11.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled11.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+    </link>
+    <link name="link12">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled12.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled12.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+    </link>
+    <link name="link13">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled13.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled13.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+    </link>
+    <link name="link14">
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+           <mass value=".0"/>
+           <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+        <visual>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled14.obj" scale="1 1 1"/>
+      </geometry>
+       <material name="green">
+        <color rgba="0.4 1 0.4 0.5"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+     <geometry>
+				<mesh filename="package://meshes/mug_comp/mug_dbl_filled14.obj" scale="1 1 1"/>
+      </geometry>
+    </collision>
+   </link>
+    <joint name="joint1" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link1"/>
+    </joint>
+    <joint name="joint2" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link2"/>
+    </joint>
+    <joint name="joint3" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link3"/>
+    </joint>
+    <joint name="joint4" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link4"/>
+    </joint>
+    <joint name="joint5" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link5"/>
+    </joint>
+    <joint name="joint6" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link6"/>
+    </joint>
+    <joint name="joint7" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link7"/>
+    </joint>
+    <joint name="joint8" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link8"/>
+    </joint>
+    <joint name="joint9" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link9"/>
+    </joint>
+    <joint name="joint10" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link10"/>
+    </joint>
+    <joint name="joint11" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link11"/>
+    </joint>
+    <joint name="joint12" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link12"/>
+    </joint>
+    <joint name="joint13" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link13"/>
+    </joint>
+    <joint name="joint14" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="baseLink"/>
+        <child link="link14"/>
+    </joint>
 </robot>
