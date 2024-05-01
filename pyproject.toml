@@ -56,7 +56,8 @@ dependencies = [# Optional
     'numpy',
     'matplotlib',
     'arm-pytorch-utilities',
-    'pytorch-kinematics'
+    'pytorch-kinematics',
+    'torchmcubes @ git+https://github.com/tatsy/torchmcubes.git',
 ]
 
 # List additional groups of dependencies here (e.g. development
