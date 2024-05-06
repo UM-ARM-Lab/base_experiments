@@ -1369,8 +1369,8 @@ class FloatingGripperEnv(PlanarArmEnv):
         p.changeDynamics(obj, -1, lateralFriction=0.8, spinningFriction=0.05, rollingFriction=0.01)
 
     def get_ee_orientation_with_yaw(self, yaw):
-        # with 0 facing the mug
-        return p.getQuaternionFromEuler([0, -np.pi / 2, yaw])
+        # this is upside down on the z axis; flip it
+        return p.getQuaternionFromEuler([0, np.pi / 2, yaw])
 
     def _setup_gripper(self):
         # orientation of the end effector (pointing down)
