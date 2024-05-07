@@ -1612,9 +1612,11 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
     def state_cost(cls):
         return np.diag([1, 1, 1, 0.3])
 
-    # def __init__(self, goal=(0.5, -0.3, 0), init=(-.0, 0.0), **kwargs):
-    #     # here goal is the initial pose of the target object
-    #     super(FloatingGripperEnv, self).__init__(goal=goal, init=init, camera_dist=0.8, **kwargs)
+    def __init__(self, *args, base_pos=(-0.5, 0, 0), base_rpy=(0., 0., np.pi), **kwargs):
+        # here goal is the initial pose of the target object
+        self.base_pos = base_pos
+        self.base_rpy = base_rpy
+        super().__init__(*args, **kwargs)
 
     def _obs(self):
         # this is of the gripper's origin, not of the last link on the arm
@@ -1638,12 +1640,15 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         # self.endEffectorOrientation = p.getQuaternionFromEuler([0, np.pi / 2, 0])
         self.endEffectorOrientation = self.get_ee_orientation_with_yaw(np.pi)
 
-        # TODO parameterize arm base and orientation
         # p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        # import pybullet_data
         # arm_path = os.path.join(pybullet_data.getDataPath(), "kuka_iiwa/model.urdf")
-        pos = [-0.5, 0, 0]
-        rpy = [0., 0., np.pi]
-        self.armId = p.loadURDF("kuka_iiwa/model.urdf", pos, p.getQuaternionFromEuler(rpy), useFixedBase=True)
+        arm_path = "kuka_iiwa/model.urdf"
+        # arm_path = os.path.join(cfg.URDF_DIR, "kuka.urdf")
+        # arm_path = os.path.join(cfg.URDF_DIR, "kuka_wsg50.urdf")
+        pos = self.base_pos
+        rpy = self.base_rpy
+        self.armId = p.loadURDF(arm_path, pos, p.getQuaternionFromEuler(rpy), useFixedBase=True)
         self.reset_base_link_frame(self.armId, pos, rpy)
 
         self.endEffectorIndex = kukaEndEffectorIndex
@@ -1663,7 +1668,7 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
                                     useFixedBase=False)
 
         # attach gripper to the end effector
-        self.gripperConstraint = p.createConstraint(self.armId, self.endEffectorIndex, self.gripperId, -1,
+        self.gripperToArmConstraint = p.createConstraint(self.armId, self.endEffectorIndex, self.gripperId, -1,
                                                     p.JOINT_FIXED, [0, 0, 1], [0, 0, 0], self.gripperOffset)
 
         # disable collision between the gripper and the arm
@@ -1708,6 +1713,9 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         final_rpy = np.array((rpy[0], -math.pi / 2, rpy[2] + dyaw))
         final_quat = p.getQuaternionFromEuler(final_rpy)
 
+        cur_yaw = self._obs()[-1]
+        final_quat = self.get_ee_orientation_with_yaw(cur_yaw + dyaw)
+
         # do interpolation in joint space instead of ee space
         cur_joints = self._observe_joints()
 
@@ -1732,6 +1740,8 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
             intermediate_joints = linear_interpolate(np.array(cur_joints), np.array(final_joints),
                                                      (step + 1) / self.mini_steps)
             self._move_and_wait_joints(intermediate_joints, steps_to_wait=self.wait_sim_step_per_mini_step)
+            if self._abort_movement:
+                break
 
         cost, done, info = self._finish_action(old_state, action)
 
@@ -1765,10 +1775,10 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
         for _ in range(1000):
             p.stepSimulation()
 
-        if self.gripperConstraint:
-            p.removeConstraint(self.gripperConstraint)
+        if self.gripperToArmConstraint:
+            p.removeConstraint(self.gripperToArmConstraint)
         p.resetBasePositionAndOrientation(self.gripperId, self.init, self.endEffectorOrientation)
-        self.gripperConstraint = p.createConstraint(self.armId, self.endEffectorIndex, self.gripperId, -1,
+        self.gripperToArmConstraint = p.createConstraint(self.armId, self.endEffectorIndex, self.gripperId, -1,
                                                     p.JOINT_FIXED, [0, 0, 1], [0, 0, 0], self.gripperOffset)
 
         for i in self.armInds:
