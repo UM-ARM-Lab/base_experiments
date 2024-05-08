@@ -17,11 +17,10 @@ from arm_pytorch_utilities import tensor_utils
 from base_experiments.env.pybullet_env import PybulletEnv, get_total_contact_force, make_box, state_action_color_pairs, \
     ContactInfo, make_cylinder, closest_point_on_surface
 from base_experiments.env.env import InfoKeys, TrajectoryLoader, handle_data_format_for_state_diff, EnvDataSource
-from base_experiments.env.panda import PandaJustGripperID
 from base_experiments import cfg
-from stucco import tracking
 from base_experiments.defines import NO_CONTACT_ID
 from stucco.detection import ContactDetector
+from base_experiments import util
 
 logger = logging.getLogger(__name__)
 
@@ -1061,6 +1060,11 @@ class PlanarArmEnv(ArmEnv):
                 break
 
         cost, done, info = self._finish_action(old_state, action)
+
+        dstate = self.state_difference(final_ee_pos[:2], old_state)
+        actual_dstate = self.state_difference(self.state, old_state)
+        util.evaluate_action(dstate, actual_dstate)
+
         rew = -cost if cost is not None else None
 
         return np.copy(self.state), rew, done, info
