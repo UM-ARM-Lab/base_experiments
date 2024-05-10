@@ -1109,8 +1109,8 @@ class FloatingGripperEnv(PlanarArmEnv):
         if action is not None:
             self._draw_action(action, old_state=state)
 
-    def __init__(self, goal=(1.3, -0.4), init=(-.1, 0.4), **kwargs):
-        super(FloatingGripperEnv, self).__init__(goal=goal, init=init, camera_dist=1, **kwargs)
+    def __init__(self, goal=(1.3, -0.4), init=(-.1, 0.4), camera_dist=1, **kwargs):
+        super(FloatingGripperEnv, self).__init__(goal=goal, init=init, camera_dist=camera_dist, **kwargs)
 
     def create_contact_detector(self, residual_threshold, residual_precision) -> ContactDetector:
         if residual_precision is None:
@@ -1460,9 +1460,9 @@ class ObjectRetrievalEnv(FloatingGripperEnv):
     def state_cost(cls):
         return np.diag([1, 1])
 
-    def __init__(self, goal=(0.5, -0.3, 0), init=(-.0, 0.0), **kwargs):
+    def __init__(self, goal=(0.5, -0.3, 0), init=(-.0, 0.0), camera_dist=0.8, **kwargs):
         # here goal is the initial pose of the target object
-        super(FloatingGripperEnv, self).__init__(goal=goal, init=init, camera_dist=0.8, **kwargs)
+        super(FloatingGripperEnv, self).__init__(goal=goal, init=init, camera_dist=camera_dist, **kwargs)
 
     def _set_goal(self, goal):
         if len(goal) != 3:

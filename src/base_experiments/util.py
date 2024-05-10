@@ -27,7 +27,7 @@ class MakedirsFileHandler(logging.FileHandler):
         logging.FileHandler.__init__(self, filename, *args, **kwargs)
 
 
-def evaluate_action(dstate, actual_dstate):
+def evaluate_action(dstate, actual_dstate, do_print=True):
     if torch.is_tensor(dstate):
         dstate = dstate.cpu().numpy()
     if torch.is_tensor(actual_dstate):
@@ -35,4 +35,6 @@ def evaluate_action(dstate, actual_dstate):
     # evaluate how well we moved relative to how much we wanted to move
     err = actual_dstate - dstate
     err_ratio = np.linalg.norm(err) / (np.linalg.norm(dstate) + 1e-8)
-    logger.info(f"action err ratio: {err_ratio:.4f}")
+    if do_print:
+        logger.info(f"action err ratio: {err_ratio:.4f} dstate: {dstate} actual_dstate: {actual_dstate}")
+    return err_ratio
