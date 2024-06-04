@@ -7,7 +7,7 @@
        <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
     </inertial>
     <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl.obj" scale="1 1 1"/>
       </geometry>
@@ -16,7 +16,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled.obj" scale="1 1 1"/>
       </geometry>
@@ -29,7 +29,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled1.obj" scale="1 1 1"/>
       </geometry>
@@ -38,7 +38,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled1.obj" scale="1 1 1"/>
       </geometry>
@@ -51,7 +51,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled2.obj" scale="1 1 1"/>
       </geometry>
@@ -60,7 +60,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled2.obj" scale="1 1 1"/>
       </geometry>
@@ -73,7 +73,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled3.obj" scale="1 1 1"/>
       </geometry>
@@ -82,7 +82,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled3.obj" scale="1 1 1"/>
       </geometry>
@@ -95,7 +95,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled4.obj" scale="1 1 1"/>
       </geometry>
@@ -104,7 +104,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled4.obj" scale="1 1 1"/>
       </geometry>
@@ -117,7 +117,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled5.obj" scale="1 1 1"/>
       </geometry>
@@ -126,7 +126,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled5.obj" scale="1 1 1"/>
       </geometry>
@@ -139,7 +139,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled6.obj" scale="1 1 1"/>
       </geometry>
@@ -148,7 +148,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled6.obj" scale="1 1 1"/>
       </geometry>
@@ -161,7 +161,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled7.obj" scale="1 1 1"/>
       </geometry>
@@ -170,7 +170,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled7.obj" scale="1 1 1"/>
       </geometry>
@@ -183,7 +183,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled8.obj" scale="1 1 1"/>
       </geometry>
@@ -192,7 +192,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled8.obj" scale="1 1 1"/>
       </geometry>
@@ -205,7 +205,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled9.obj" scale="1 1 1"/>
       </geometry>
@@ -214,7 +214,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled9.obj" scale="1 1 1"/>
       </geometry>
@@ -227,7 +227,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled10.obj" scale="1 1 1"/>
       </geometry>
@@ -236,7 +236,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled10.obj" scale="1 1 1"/>
       </geometry>
@@ -249,7 +249,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled11.obj" scale="1 1 1"/>
       </geometry>
@@ -258,7 +258,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled11.obj" scale="1 1 1"/>
       </geometry>
@@ -271,7 +271,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled12.obj" scale="1 1 1"/>
       </geometry>
@@ -280,7 +280,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled12.obj" scale="1 1 1"/>
       </geometry>
@@ -293,7 +293,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled13.obj" scale="1 1 1"/>
       </geometry>
@@ -302,7 +302,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled13.obj" scale="1 1 1"/>
       </geometry>
@@ -315,7 +315,7 @@
            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
         </inertial>
         <visual>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled14.obj" scale="1 1 1"/>
       </geometry>
@@ -324,7 +324,7 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 1.57" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
      <geometry>
 				<mesh filename="package://meshes/mug_comp/mug_dbl_filled14.obj" scale="1 1 1"/>
       </geometry>
