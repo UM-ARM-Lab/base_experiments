@@ -210,7 +210,9 @@ class ArmEnv(PybulletEnv):
         """
         super().__init__(**kwargs, default_debug_height=0.1, camera_dist=camera_dist)
         self._dd.toggle_3d(True)
-        self.level = Levels(environment_level)
+        if type(environment_level) is int:
+            environment_level = Levels(environment_level)
+        self.level = environment_level
         self.sim_step_wait = sim_step_wait
         # as long as this is above a certain amount we won't exceed it in freespace pushing if we have many mini steps
         self.mini_steps = mini_steps
