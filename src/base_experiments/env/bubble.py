@@ -13,12 +13,15 @@ import numpy as np
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 
-from arm_pytorch_utilities import tensor_utils
+from arm_pytorch_utilities import tensor_utils, math_utils
+
+import pytorch_kinematics as pk
 from base_experiments.env.pybullet_env import PybulletEnv, get_total_contact_force, make_box, state_action_color_pairs, \
     ContactInfo, make_cylinder, closest_point_on_surface
 from base_experiments.env.env import InfoKeys, TrajectoryLoader, handle_data_format_for_state_diff, EnvDataSource
 from base_experiments import cfg
 from base_experiments.defines import NO_CONTACT_ID
+from stucco.sensors import PybulletOracleContactSensor
 from stucco.detection import ContactDetector
 from base_experiments import util
 
@@ -579,18 +582,68 @@ class ArmEnv(PybulletEnv):
         # changes when end effector type changes
         return p.getContactPoints(bodyId, self.armId, linkIndexB=self.endEffectorIndex)
 
-    def _observe_raw_reaction_force(self, info, reaction_force, reaction_torque, visualize=True):
-        # can estimate change in state only when in contact
+    def _observe_ee_to_world_tf(self):
+        new_ee_pos, new_ee_orientation = self._observe_ee(return_z=True, return_orientation=True)
+        pos = torch.tensor(new_ee_pos)
+        rot = torch.tensor(new_ee_orientation)
+        m = pk.pos_rot_to_matrix(pos, rot)
+        return pk.Transform3d(matrix=m)
+
+    def _start_move_step(self):
+        self.last_ee_to_world_tf = self._observe_ee_to_world_tf()
+
+    def _observe_dx(self, info, reaction_force, reaction_torque):
         new_ee_pos, new_ee_orientation = self._observe_ee(return_z=True, return_orientation=True)
         pose = (new_ee_pos, new_ee_orientation)
-        if self.contact_detector.observe_residual(np.r_[reaction_force, reaction_torque], pose):
-            dx = np.subtract(new_ee_pos, self.last_ee_pos)
-            self.contact_detector.observe_dx(dx[:2])
-            info[InfoKeys.DEE_IN_CONTACT] = dx
-        self.last_ee_pos = new_ee_pos
+        pos = torch.tensor(new_ee_pos)
+        rot = torch.tensor(new_ee_orientation)
+        m = pk.pos_rot_to_matrix(pos, rot)
+        ee_to_world_tf = pk.Transform3d(matrix=m)
 
+        max_friction_cone_angle = 45 * math.pi / 180
+        if self.contact_detector.observe_residual(np.r_[reaction_force, reaction_torque], pose):
+            # we have the current ee to world
+            A_to_B_world = ee_to_world_tf.compose(self.last_ee_to_world_tf.inverse())
+            B_to_A_world = A_to_B_world.inverse()
+
+            # find point on the robot in contact
+            contacts = self.get_ee_contact_info(self.target_object_id)
+            dx = np.zeros(2)
+            for c in contacts:
+                pt_on_robot = c[ContactInfo.POS_B]
+                prev_pt_on_robot = B_to_A_world.transform_points(torch.tensor(pt_on_robot).view(1, -1))
+                prev_pt_on_robot = prev_pt_on_robot.numpy().flatten()
+                size = c[ContactInfo.NORMAL_MAG]
+
+                # ignore sliding
+                obj_normal = c[ContactInfo.NORMAL_DIR_B]
+
+                # self.vis.draw_point('contact', pt_on_robot, (1, 0, 0), scale=size / 10)
+                # self.vis.draw_point('contact_prev', prev_pt_on_robot, (0, 1, 0), scale=size / 10)
+                # self.vis.draw_2d_line('contact_normal', pt_on_robot, obj_normal, (0, 0, 1), scale=size / 10)
+
+                this_dx = pt_on_robot - prev_pt_on_robot
+                from_obj_normal = math_utils.angle_between_stable(torch.tensor(obj_normal).view(1, -1),
+                                                                  -torch.tensor(this_dx).view(1, -1))
+                from_obj_normal = from_obj_normal.item()
+                pushing = from_obj_normal < max_friction_cone_angle
+
+                # if size > 10:
+                #     dx += this_dx[:2]
+
+                # if pushing:
+                #     dx += this_dx[:2]
+                dx += this_dx[:2]
+
+            self.contact_detector.observe_dx(dx)
+            info[InfoKeys.DEE_IN_CONTACT] = dx
+        self.last_ee_to_world_tf = ee_to_world_tf
         # save end effector pose
         info[InfoKeys.HIGH_FREQ_EE_POSE] = np.r_[new_ee_pos, new_ee_orientation]
+
+    def _observe_raw_reaction_force(self, info, reaction_force, reaction_torque, visualize=True):
+        # can estimate change in state only when in contact
+        self._observe_dx(info, reaction_force, reaction_torque)
 
         # save reaction force
         info[InfoKeys.HIGH_FREQ_REACTION_T] = reaction_torque
@@ -707,7 +760,7 @@ class ArmEnv(PybulletEnv):
 
     def _move_and_wait(self, eePos, steps_to_wait=50):
         # execute the action
-        self.last_ee_pos = self._observe_ee(return_z=True)
+        self._start_move_step()
         self._move_pusher(eePos)
         p.stepSimulation()
         for _ in range(steps_to_wait):
@@ -1118,13 +1171,11 @@ class FloatingGripperEnv(PlanarArmEnv):
         if residual_precision is None:
             residual_precision = np.diag([1, 1, 1, 50, 50, 50])
         contact_detector = ContactDetector(residual_precision)
-        # TODO implement
-        # contact_detector.register_contact_sensor(
-        #     PybulletResidualPlanarContactSensor("floating_gripper", residual_threshold,
-        #                                         robot_id=self.robot_id,
-        #                                         canonical_orientation=self.endEffectorOrientation,
-        #                                         default_joint_config=[0, 0]))
+        contact_detector.register_contact_sensor(PybulletOracleContactSensor(self.robot_id, self.get_target_id))
         return contact_detector
+
+    def get_target_id(self):
+        return self.target_object_id
 
     def _observe_ee(self, return_z=False, return_orientation=False):
         gripperPose = p.getBasePositionAndOrientation(self.gripperId)
@@ -1675,7 +1726,7 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
 
         # attach gripper to the end effector
         self.gripperToArmConstraint = p.createConstraint(self.armId, self.endEffectorIndex, self.gripperId, -1,
-                                                    p.JOINT_FIXED, [0, 0, 1], [0, 0, 0], self.gripperOffset)
+                                                         p.JOINT_FIXED, [0, 0, 1], [0, 0, 0], self.gripperOffset)
 
         # disable collision between the gripper and the arm
         for kuka_link_index in range(p.getNumJoints(self.armId)):
@@ -1785,7 +1836,7 @@ class ObjectRetrievalArmEnv(ObjectRetrievalEnv):
             p.removeConstraint(self.gripperToArmConstraint)
         p.resetBasePositionAndOrientation(self.gripperId, self.init, self.endEffectorOrientation)
         self.gripperToArmConstraint = p.createConstraint(self.armId, self.endEffectorIndex, self.gripperId, -1,
-                                                    p.JOINT_FIXED, [0, 0, 1], [0, 0, 0], self.gripperOffset)
+                                                         p.JOINT_FIXED, [0, 0, 1], [0, 0, 0], self.gripperOffset)
 
         for i in self.armInds:
             p.resetJointState(self.armId, i, self.initJoints[i])
