@@ -148,9 +148,9 @@ class PybulletEnv(Env):
         # disable useless menus on the left and right
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
         if self.log_video:
-            self.logging_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4,
-                                                  "{}_{}.mp4".format(datetime.now().strftime('%Y_%m_%d_%H_%M_%S'),
-                                                                     self.video_name))
+            if self.video_name == "":
+                self.video_name = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+            self.logging_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "{}.mp4".format(self.video_name))
 
         # use data provided by PyBullet
         p.setAdditionalSearchPath(pybullet_data.getDataPath())  # optionally
