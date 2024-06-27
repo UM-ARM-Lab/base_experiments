@@ -365,6 +365,7 @@ class DebugRvizDrawer(Visualizer):
         marker = self.make_marker(name, marker_type=Marker.MESH_RESOURCE, scale=scale, id=object_id)
         # sanitize resource link
         marker.mesh_resource = cfg.ensure_rviz_resource_path(model)
+        rospy.loginfo(f"Drawing mesh {model} with id {object_id} with mesh resource {marker.mesh_resource}")
 
         # apply offset in visual frame
         h1 = torch.eye(4, dtype=torch.float)
