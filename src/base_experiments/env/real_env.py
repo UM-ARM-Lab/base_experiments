@@ -79,9 +79,13 @@ class DebugRvizDrawer(Visualizer):
         id = int(tokens[1]) if len(tokens) == 2 else 0
         return tokens[0], id
 
-    def draw_points(self, name, points, color=(0, 0, 0), height=None, length=0.01, scale=1, cubes=False):
+    def draw_points(self, name, points, color=(0, 0, 0), **kwargs):
+        height = kwargs.get("height", None)
+        scale = kwargs.get("scale", 1)
+        cubes = kwargs.get("cubes", False)
         ns, this_id = self._extract_ns_id_from_name(name)
-        marker = self.make_marker(ns, marker_type=Marker.CUBE_LIST if cubes else Marker.POINTS, scale=self.BASE_SCALE * scale, id=this_id)
+        marker = self.make_marker(ns, marker_type=Marker.CUBE_LIST if cubes else Marker.POINTS,
+                                  scale=self.BASE_SCALE * scale, id=this_id)
         for i, point in enumerate(points):
             z = height if height is not None else point[2]
             p = Point()
@@ -422,6 +426,12 @@ class CombinedVisualizer(Visualizer):
             self.sim.draw_point(*args, **kwargs)
         if self.ros is not None:
             self.ros.draw_point(*args, **kwargs)
+
+    def draw_points(self, *args, **kwargs):
+        if self.sim is not None:
+            self.sim.draw_points(*args, **kwargs)
+        if self.ros is not None:
+            self.ros.draw_points(*args, **kwargs)
 
     def draw_2d_line(self, *args, **kwargs):
         if self.sim is not None:
