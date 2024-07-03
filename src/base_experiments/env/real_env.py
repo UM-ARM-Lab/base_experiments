@@ -398,7 +398,7 @@ class DebugRvizDrawer(Visualizer):
 
         if rgba != (0, 0, 0, 1.):
             marker.color.r = rgba[0]
-            marker.color.b = rgba[1]
+            marker.color.g = rgba[1]
             marker.color.b = rgba[2]
             marker.color.a = rgba[3]
         else:
