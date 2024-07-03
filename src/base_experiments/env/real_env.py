@@ -405,7 +405,7 @@ class DebugRvizDrawer(Visualizer):
             marker.mesh_use_embedded_materials = True
 
         self.marker_pub.publish(marker)
-        rospy.sleep(0.1)
+        # rospy.sleep(0.1)
         self.marker_pub.publish(marker)
         return object_id
 
