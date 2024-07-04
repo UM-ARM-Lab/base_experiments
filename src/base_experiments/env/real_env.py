@@ -66,11 +66,12 @@ class VideoLogger:
 class DebugRvizDrawer(Visualizer):
     BASE_SCALE = 0.005
 
-    def __init__(self, action_scale=0.1, max_nominal_model_error=20, world_frame="victor_root"):
+    def __init__(self, action_scale=0.1, max_nominal_model_error=20, world_frame="victor_root", default_alpha=0.5):
         self.marker_pub = rospy.Publisher("visualization_marker", Marker, queue_size=0)
         self.action_scale = action_scale
         self.max_nom_model_error = max_nominal_model_error
         self.world_frame = world_frame
+        self.default_alpha = default_alpha
         self._ns = {}
         self._mesh_to_single_id = {}
 
@@ -369,7 +370,7 @@ class DebugRvizDrawer(Visualizer):
         marker = self.make_marker(name, marker_type=Marker.MESH_RESOURCE, scale=scale, id=object_id)
         # sanitize resource link
         marker.mesh_resource = cfg.ensure_rviz_resource_path(model)
-        rospy.loginfo(f"Drawing mesh {model} with id {object_id} with mesh resource {marker.mesh_resource}")
+        logger.debug(f"Drawing mesh {model} with id {object_id} with mesh resource {marker.mesh_resource}")
 
         # apply offset in visual frame
         h1 = torch.eye(4, dtype=torch.float)
@@ -400,7 +401,8 @@ class DebugRvizDrawer(Visualizer):
             marker.color.r = rgba[0]
             marker.color.g = rgba[1]
             marker.color.b = rgba[2]
-            marker.color.a = rgba[3]
+            alpha = rgba[3] if len(rgba) > 3 else self.default_alpha
+            marker.color.a = alpha
         else:
             marker.mesh_use_embedded_materials = True
 
