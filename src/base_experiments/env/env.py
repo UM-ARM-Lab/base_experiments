@@ -329,12 +329,17 @@ def draw_ordered_end_points(vis: Visualizer, pts):
         (7, 5): (1, 1, 1),
         (7, 6): (1, 1, 1)
     }
-    i = 0
+    starts = []
+    diffs = []
+    rgbs = []
     for pair, rgb in order_to_rgb.items():
         f = pts[pair[0]]
         t = pts[pair[1]]
-        vis.draw_2d_line(f"bb.{i}", f, t - f, rgb, scale=1)
-        i += 1
+        starts.append(f)
+        diffs.append(t - f)
+        rgbs.append(rgb)
+
+    vis.draw_2d_lines(f"bb", starts, diffs, rgbs, scale=1)
 
 
 def draw_AABB(vis: Visualizer, aabb):
