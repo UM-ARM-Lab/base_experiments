@@ -358,14 +358,19 @@ class DebugRvizDrawer(Visualizer):
 
     def draw_mesh(self, name, model, pose, rgba=(0, 0, 0, 1.), scale=1., object_id=None, vis_frame_pos=(0, 0, 0),
                   vis_frame_rot=(0, 0, 0, 1)):
+        to_save_object_id = False
         if object_id == self.USE_DEFAULT_ID_FOR_NAME:
             object_id = self._mesh_to_single_id.get(name, None)
+            to_save_object_id = True
 
         if object_id is None:
             if name not in self._ns:
                 object_id = 0
             else:
                 object_id = max(self._ns[name]) + 1
+
+        if to_save_object_id:
+            self._mesh_to_single_id[name] = object_id
 
         marker = self.make_marker(name, marker_type=Marker.MESH_RESOURCE, scale=scale, id=object_id)
         # sanitize resource link
