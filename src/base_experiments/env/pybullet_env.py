@@ -509,7 +509,7 @@ class DebugDrawer(Visualizer):
 
     def draw_mesh(self, name, model, pose, rgba=(0, 0, 0, 1.), scale=1., object_id=None, vis_frame_pos=(0, 0, 0),
                   vis_frame_rot=(0, 0, 0, 1)):
-        visual_shape_name = f"{model}{rgba}"
+        visual_shape_name = f"{model}"
         visual_shape_id = self._mesh_shape_ids.get(visual_shape_name, None)
         if visual_shape_id is None:
             visual_shape_id = p.createVisualShape(shapeType=p.GEOM_MESH,
@@ -523,9 +523,10 @@ class DebugDrawer(Visualizer):
         if object_id == self.USE_DEFAULT_ID_FOR_NAME:
             object_id = self._mesh_to_single_id.get(name, None)
 
-        if object_id is None:
+        if object_id is None or object_id not in self._drawn_mesh_ids:
             object_id = p.createMultiBody(baseMass=0, basePosition=pos, baseVisualShapeIndex=visual_shape_id)
         p.resetBasePositionAndOrientation(object_id, pos, rot)
+        p.changeVisualShape(object_id, -1, rgbaColor=rgba)
         self._drawn_mesh_ids.add(object_id)
         self._mesh_to_single_id[name] = object_id
 
