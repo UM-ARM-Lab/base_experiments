@@ -307,7 +307,11 @@ class DebugDrawer(Visualizer):
         self._3dmode = False
         self._inv_camera_tsf = None
         self._mesh_shape_ids = {}
+        self._hide_text = False
         self.set_camera_position([0, 0])
+
+    def set_hide_text(self, hide_text):
+        self._hide_text = hide_text
 
     def set_camera_position(self, camera_pos, yaw=0, pitch=-89):
         self._camera_pos = camera_pos
@@ -469,6 +473,8 @@ class DebugDrawer(Visualizer):
             self._debug_ids[name] = []
 
     def draw_text(self, name, text, location_index, left_offset=1., offset_in_z=False):
+        if self._hide_text:
+            return
         if name not in self._debug_ids:
             self._debug_ids[name] = -1
         uid = self._debug_ids[name]
@@ -489,6 +495,8 @@ class DebugDrawer(Visualizer):
         return self._debug_ids[name]
 
     def draw_screen_text(self, name, text, camera_frame_pos):
+        if self._hide_text:
+            return
         # not in camera mode, ignore
         if self._inv_camera_tsf is None:
             return

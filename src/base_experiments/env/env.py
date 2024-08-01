@@ -19,6 +19,7 @@ class InfoKeys:
     # highgest frequency feedback of reaction force and torque at end effector
     HIGH_FREQ_REACTION_F = "r"
     HIGH_FREQ_REACTION_T = "t"
+    HIGH_FREQ_WRENCH = "w"
     HIGH_FREQ_EE_POSE = "p"  # position cat with unit quaternion orientation
     HIGH_FREQ_CONTACT_POINT = "c"
     LOW_FREQ_REACTION_F = "reaction"
@@ -100,6 +101,9 @@ class Visualizer:
     # in these cases it's more convenient for the drawer to bookkeep the mesh's ID
     # this is a special value for the object_id input of draw_mesh that will handle this case
     USE_DEFAULT_ID_FOR_NAME = -100
+
+    def set_hide_text(self, hide_text):
+        pass
 
     @abc.abstractmethod
     def draw_point(self, name, point, color=(0, 0, 0), length=0.01, length_ratio=1, rot=0, height=None, label=None,
