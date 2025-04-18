@@ -688,8 +688,9 @@ class ArmEnv(PybulletEnv):
             info[name] = info[name].sum(axis=0)
         else:
             info[name] = np.zeros(3)
-        most_frequent_contact = scipy.stats.mode(self._mini_step_contact['id'], keepdims=True)
-        info[InfoKeys.CONTACT_ID] = int(most_frequent_contact[0])
+        # count how many times we were in contact with each object
+        unique_contact_ids, counts = np.unique(self._mini_step_contact['id'], return_counts=True)
+        info[InfoKeys.CONTACT_ID] = {int(ids): count for ids, count in zip(unique_contact_ids, counts)}
 
         # ground truth object information
         if len(self.movable + self.immovable):
