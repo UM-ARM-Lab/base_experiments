@@ -5,7 +5,7 @@ import torch
 
 import numpy as np
 
-from itar_experiments.env.env import logger
+logger = logging.getLogger(__name__)
 
 
 def move_figure(f, x, y):
